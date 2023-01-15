@@ -4,9 +4,9 @@ from src.schnapsen.game import Bot, PlayerPerspective, Move, SchnapsenTrickScore
 
 class Bot2(Bot):
     def __init__(self, seed: int) -> None:
-        self.seed = seed
-        self.rng = random.Random(self.seed)
-        self.previous_move = None
+        self._seed = seed
+        self._rng = random.Random(self.seed)
+        self._previous_move = None
     def get_move(
         self,
         state: PlayerPerspective,
