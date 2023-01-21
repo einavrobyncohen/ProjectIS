@@ -3,7 +3,7 @@ from src.schnapsen.game import Bot, PlayerPerspective, Move, GameState, GamePlay
 from random import Random
 
 
-class RdeepBot(Bot):
+class RdeepMLBot(Bot):
     def __init__(self, num_samples: int, depth: int, rand: Random) -> None:
         """
         Create a new rdeep bot.
@@ -30,7 +30,7 @@ class RdeepBot(Bot):
         for move in moves:
             sum_of_scores = 0.0
             for _ in range(self.__num_samples):
-                gamestate = state.make_assumption(leader_move=leader_move, rand=self.__rand)
+                gamestate = state.make_assumption_ML(leader_move=leader_move, rand=self.__rand, my_move=move)
                 score = self.__evaluate(gamestate, state.get_engine(), leader_move, move)
                 sum_of_scores += score
             average_score = sum_of_scores / self.__num_samples

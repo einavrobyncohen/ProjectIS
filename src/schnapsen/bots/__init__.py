@@ -6,5 +6,5 @@ from .alphabeta import AlphaBetaBot
 from .rdeep import RdeepBot
 from .ml_bot import MLDataBot, MLPlayingBot, train_ML_model
 from .gui.guibot import SchnapsenServer
-
-__all__ = ["RandBot", "AlphaBetaBot", "RdeepBot", "MLDataBot", "MLPlayingBot", "train_ML_model", "SchnapsenServer"]
+from .rdeep_ML import RdeepMLBot
+__all__ = ["RdeepMLBot", "RandBot", "AlphaBetaBot", "RdeepBot", "MLDataBot", "MLPlayingBot", "train_ML_model", "SchnapsenServer"]

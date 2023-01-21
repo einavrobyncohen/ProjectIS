@@ -4,16 +4,17 @@ import pathlib
 from typing import Optional
 
 import click
-from schnapsen.bots import MLDataBot, train_ML_model, MLPlayingBot, RandBot
+from src.schnapsen.bots.rdeep_ML import RdeepMLBot
+from src.schnapsen.bots import MLDataBot, train_ML_model, MLPlayingBot, RandBot
 
-from schnapsen.bots.example_bot import ExampleBot
+from src.schnapsen.bots.example_bot import ExampleBot
 
-from schnapsen.game import (Bot, Move, PlayerPerspective,
+from src.schnapsen.game import (Bot, Move, PlayerPerspective,
                             SchnapsenGamePlayEngine, Trump_Exchange)
-from schnapsen.twenty_four_card_schnapsen import \
+from src.schnapsen.twenty_four_card_schnapsen import \
     TwentyFourSchnapsenGamePlayEngine
 
-from schnapsen.bots.rdeep import RdeepBot
+from src.schnapsen.bots.rdeep import RdeepBot
 
 
 @click.group()
@@ -94,7 +95,7 @@ def rdeep_game() -> None:
     bot1: Bot
     bot2: Bot
     engine = SchnapsenGamePlayEngine()
-    rdeep = bot1 = RdeepBot(num_samples=16, depth=4, rand=random.Random(4564654644))
+    rdeep = bot1 = RdeepBot(num_samples=12, depth=6, rand=random.Random(4564654644))
     bot2 = RandBot(464566)
     wins = 0
     amount = 100
@@ -107,7 +108,25 @@ def rdeep_game() -> None:
         if game_number % 10 == 0:
             print(f"won {wins} out of {game_number}")
 
-
+@main.command()
+def rdeepML_game() -> None:
+    bot1: Bot
+    bot2: Bot
+    engine = SchnapsenGamePlayEngine()
+    rdeep = bot1 = RdeepMLBot(num_samples=12, depth=6, rand=random.Random(4564654644))
+    bot2 = RandBot(464566)
+    wins = 0
+    amount = 100
+    for game_number in range(1, amount + 1):
+        if game_number % 2 == 0:
+            bot1, bot2 = bot2, bot1
+        winner_id, _, _ = engine.play_game(bot1, bot2, random.Random(game_number))
+        if winner_id == rdeep:
+            wins += 1
+        if game_number % 10 == 0:
+            print(f"won {wins} out of {game_number}")
+            
+            
 @main.group()
 def ml() -> None:
     """Commands for the ML bot"""
