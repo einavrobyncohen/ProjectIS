@@ -39,16 +39,16 @@ class MLPlayingBot(Bot):
 
         # create all model inputs, for all bot's valid moves
         action_state_representations: list[list[int]] = []
-
+        cards_representation = available_card_feature_vector(state)
         if state.am_i_leader():
             follower_move_representation = get_move_feature_vector(None)
             for my_move_representation in my_move_representations:
                 action_state_representations.append(
-                    state_representation + my_move_representation + follower_move_representation)
+                    state_representation + my_move_representation + follower_move_representation + cards_representation)
         else:
             for my_move_representation in my_move_representations:
                 action_state_representations.append(
-                    state_representation + leader_move_representation + my_move_representation)
+                    state_representation + leader_move_representation + my_move_representation + cards_representation)
 
         model_output = self.__model.predict_proba(action_state_representations)
         winning_probabilities_of_moves = [outcome_prob[1] for outcome_prob in model_output]
@@ -164,7 +164,7 @@ def train_ML_model(replay_memory_location: Optional[pathlib.Path],
         for line in replay_memory_file:
             feature_string, won_label_str = line.split("||")
             feature_list_strings: list[str] = feature_string.split(",")
-            feature_list = [int(feature) for feature in feature_list_strings]
+            feature_list = [float(feature) for feature in feature_list_strings]
             won_label = int(won_label_str)
             data.append(feature_list)
             targets.append(won_label)
@@ -189,7 +189,7 @@ def train_ML_model(replay_memory_location: Optional[pathlib.Path],
         # needs a bigger dataset, but if you find the correct combination of neurons and neural layers and provide a big enough training dataset can lead to better performance
 
         # one layer of 30 neurons
-        hidden_layer_sizes = (30)
+        hidden_layer_sizes = (30, 20, 30)
         # two layers of 30 and 5 neurons respectively
         # hidden_layer_sizes = (30, 5)
 
@@ -199,11 +199,12 @@ def train_ML_model(replay_memory_location: Optional[pathlib.Path],
 
         # The regularization term aims to prevent over-fitting, and we can tweak its strength here.
         regularization_strength = 0.0001
-
+        max_iter = 400
+        solver = "adam"
         # Train a neural network
         learner = MLPClassifier(hidden_layer_sizes=hidden_layer_sizes, learning_rate_init=learning_rate,
-                                alpha=regularization_strength, verbose=True, early_stopping=True, n_iter_no_change=6,
-                                activation='tanh')
+                                alpha=regularization_strength, verbose=True, early_stopping=False, max_iter = max_iter,
+                                activation='tanh', solver=solver)
     elif model_class == 'LR':
         # Train a simpler Linear Logistic Regression model
         # learn more about the model or how to use better use it by checking out its documentation
@@ -234,8 +235,8 @@ def create_state_and_actions_vector_representation(state: PlayerPerspective, lea
     player_game_state_representation = get_state_feature_vector(state)
     leader_move_representation = get_move_feature_vector(leader_move)
     follower_move_representation = get_move_feature_vector(follower_move)
-
-    return player_game_state_representation + leader_move_representation + follower_move_representation
+    cards_representation = available_card_feature_vector(state)
+    return player_game_state_representation + leader_move_representation + follower_move_representation + cards_representation
 
 
 def get_one_hot_encoding_of_card_suit(card_suit: Suit) -> List[int]:
@@ -427,3 +428,75 @@ def get_state_feature_vector(state: PlayerPerspective) -> List[int]:
     state_feature_list += deck_knowledge_in_consecutive_one_hot_encodings
 
     return state_feature_list
+
+def available_card_feature_vector(state: PlayerPerspective) -> List[float]:
+    """
+        This function returns available cards in the phase 1 with probabilities.
+        Important: This function should not include the move of this agent.
+        It should only include any earlier actions of other agents (so the action of the other agent in case that is the leader)
+    """
+    # Suit order: HEARTS, CLUBS, SPADES, DIAMONDS
+
+	# 0, 1, 2, 3 - ACE
+	# 4, 5, 6, 7 - TEN
+	# 8, 9, 10, 11 - JACK
+	# 12, 13, 14, 15 - QUEEN
+    # 16, 17, 18, 19 - KING
+    all_cards=[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
+    player_hands = state.get_hand()
+    player_won_cards = state.get_won_cards()
+    opponent_won_cards = state.get_opponent_won_cards()
+    for used_cards in [player_hands, player_won_cards, opponent_won_cards]:
+        for card in used_cards:
+            card_suit = card.suit
+            card_rank = card.rank
+            if card_suit == Suit.HEARTS:
+                suit_index = 0
+            elif card_suit == Suit.CLUBS:
+                suit_index = 1
+            elif card_suit == Suit.SPADES:
+                suit_index = 2
+            elif card_suit == Suit.DIAMONDS:
+                suit_index = 3
+            else:
+                raise ValueError("Suit of card was not found!")
+            if card_rank == Rank.ACE:
+                rank_index = 0
+            elif card_rank == Rank.TEN:
+                rank_index = 4
+            elif card_rank == Rank.JACK:
+                rank_index = 8
+            elif card_rank == Rank.QUEEN:
+                rank_index = 12
+            elif card_rank == Rank.KING:
+                rank_index = 16
+            else:
+                raise AssertionError("Provided card Rank does not exist!")
+            index = rank_index + suit_index
+            all_cards[index] = 0
+    available_cards = 0
+    for card in all_cards:
+        if card == 1:
+            available_cards += 1
+            
+    n = 20 - available_cards
+    # total nC5
+    # probability of a card will be chosen in the opponent hands n-1C4
+    if n > 5:
+        cards_prob = []
+        total = n * (n-1) * (n-2) * (n-3) * (n-4)/(5*4*3*2*1)
+        cases = (n-1) * (n-2) * (n-3) * (n-4)/(4*3*2*1)
+        probability = cases / total
+        for binary_num in all_cards:
+            if binary_num == 0:
+                cards_prob += [0]
+            else:
+                cards_prob += [probability]
+    else:
+        cards_prob = []
+        for binary_num in all_cards:
+            if binary_num == 0:
+                cards_prob += [1.0]
+            else:
+                cards_prob += [0.0]
+    return all_cards + cards_prob

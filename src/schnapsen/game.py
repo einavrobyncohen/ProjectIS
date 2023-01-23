@@ -883,7 +883,7 @@ class PlayerPerspective(ABC):
         if self.get_phase() == GamePhase.TWO:
             return full_state
         
-        model = joblib.load("ML_models\experiment_model")
+        model = joblib.load("ML_models/predict_hands")
         seen_cards = self.seen_cards(leader_move)
         full_deck = self.__engine.deck_generator.get_initial_deck()
         # get the sate feature representation
@@ -1302,6 +1302,17 @@ class PlayerPerspective(ABC):
                 else:
                     cards_prob += [0.0]
         return all_cards + cards_prob
+    def create_state_and_actions_vector_representation(self, state, leader_move: Optional[Move],
+                                                   follower_move: Optional[Move]) -> List[int]:
+        """
+        This function takes as input a PlayerPerspective variable, and the two moves of leader and follower,
+        and returns a list of complete feature representation that contains all information
+        """
+        player_game_state_representation = self.get_state_feature_vector(state)
+        leader_move_representation = self.get_move_feature_vector(leader_move)
+        follower_move_representation = self.get_move_feature_vector(follower_move)
+        cards_representation = self.available_card_feature_vector(state)
+        return player_game_state_representation + leader_move_representation + follower_move_representation + cards_representation
 
 class _DummyBot(Bot):
     """A bot used by PlayerPerspective.make_assumption to replace the real bots. This bot cannot play and will throw an Exception for everything"""
