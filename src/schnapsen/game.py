@@ -5,6 +5,7 @@ In this module you will find all parts related to playing a game of Schnapsen.
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from enum import Enum
+import pathlib
 from random import Random
 from typing import Iterable, Optional, Tuple, Union,List, cast, Any
 from .deck import CardCollection, OrderedCardCollection, Card, Rank, Suit
@@ -873,6 +874,7 @@ class PlayerPerspective(ABC):
         """
         opponent_hand = self.__get_opponent_bot_state().hand.copy()
 
+        
         if leader_move is not None:
             self.__game_state.leader.hand.get_cards()
             # get the leader's move representation, even if it is None
@@ -1042,6 +1044,7 @@ class PlayerPerspective(ABC):
 
         assert len(unseen_cards) == 0, "All cards must be consumed by either the opponent hand or talon by now"
         return full_state
+    
     def get_one_hot_encoding_of_card_suit(self, card_suit: Suit) -> List[int]:
         """
         Translating the suit of a card into one hot vector encoding of size 4.

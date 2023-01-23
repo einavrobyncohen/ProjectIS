@@ -20,21 +20,21 @@ class RdeepMLBot(Bot):
         self.__num_samples = num_samples
         self.__depth = depth
         self.__rand = rand
-
+        self.previous_state = []
     def get_move(self, state: PlayerPerspective, leader_move: Optional[Move]) -> Move:
         # get the list of valid moves, and shuffle it such
         # that we get a random move of the highest scoring
         # ones if there are multiple highest scoring moves.
         moves = state.valid_moves()
         self.__rand.shuffle(moves)
-
         best_score = float('-inf')
         best_move = None
+        model_path = self.predict_opponent(state)
         for move in moves:
             sum_of_scores = 0.0
             for _ in range(self.__num_samples):
                 gamestate = state.make_assumption_ML(leader_move=leader_move, rand=self.__rand, my_move=move)
-                score = self.__evaluate(state, gamestate, state.get_engine(), leader_move, move)
+                score = self.__evaluate(model_path, gamestate, state.get_engine(), leader_move, move)
                 sum_of_scores += score
             average_score = sum_of_scores / self.__num_samples
             if average_score > best_score:
@@ -43,7 +43,7 @@ class RdeepMLBot(Bot):
         assert best_move is not None
         return best_move
 
-    def __evaluate(self, perspective: PlayerPerspective, gamestate: GameState, engine: GamePlayEngine, leader_move: Optional[Move], my_move: Move) -> float:
+    def __evaluate(self, model_path, gamestate: GameState, engine: GamePlayEngine, leader_move: Optional[Move], my_move: Move) -> float:
         """
         Evaluates the value of the given state for the given player
         :param state: The state to evaluate
@@ -52,21 +52,22 @@ class RdeepMLBot(Bot):
                 state is for the player.
         """
         me: Bot
-        opponent : Bot
         leader_bot: Bot
         follower_bot: Bot
-        game_history: list[tuple[PlayerPerspective, Trick]] = cast(list[tuple[PlayerPerspective, Trick]], perspective.get_game_history()[:-1])
-        
+        if model_path is None:
+            oppoenet = RandBot(rand=self.__rand)
+        else:
+            oppoenet = MLPlayingBot(pathlib.Path(model_path))
         if leader_move:
             # we know what the other bot played
-            leader_bot = FirstFixedMoveThenBaseBot(RandBot(rand=self.__rand), leader_move)
+            leader_bot = FirstFixedMoveThenBaseBot(oppoenet, leader_move)
             # I am the follower
-            me = follower_bot = FirstFixedMoveThenBaseBot(RandBot(rand=self.__rand), my_move)
+            me = follower_bot = FirstFixedMoveThenBaseBot(MLPlayingBot(pathlib.Path("ML_models/rdeep_model")), my_move)
         else:
             # I am the leader bot
-            me = leader_bot = FirstFixedMoveThenBaseBot(RandBot(rand=self.__rand), my_move)
+            me = leader_bot = FirstFixedMoveThenBaseBot(MLPlayingBot(pathlib.Path("ML_models/rdeep_model")), my_move)
             # We assume the other bot just random
-            follower_bot = RandBot(rand=self.__rand)
+            follower_bot = oppoenet
 
         new_game_state, _ = engine.play_at_most_n_tricks(game_state=gamestate, new_leader=leader_bot, new_follower=follower_bot, n=self.__depth)
 
@@ -80,7 +81,37 @@ class RdeepMLBot(Bot):
         heuristic = my_score / (my_score + opponent_score)
         return heuristic
 
-
+    def predict_opponent(self, state: PlayerPerspective):
+        game_history: list[tuple[PlayerPerspective, Trick]] = cast(list[tuple[PlayerPerspective, Trick]], state.get_game_history())
+        if len(game_history) > 1:
+            prev = game_history[-2]
+            round_player_perspective, round_trick = prev
+            if round_trick.is_trump_exchange():
+                leader_move = round_trick.exchange
+                follower_move = None
+            else:
+                leader_move = round_trick.leader_move
+                follower_move = round_trick.follower_move
+            # we do not want this representation to include actions that followed. So if this agent was the leader, we ignore the followers move
+            if round_player_perspective.am_i_leader():
+                follower_move = None
+            state_actions_representation = state.create_state_and_actions_vector_representation(
+                state=round_player_perspective, leader_move=leader_move, follower_move=follower_move)
+            self.previous_state += [state_actions_representation]
+            model = joblib.load("ML_models/KNN_model")
+            pred = list(model.predict(self.previous_state))
+            index = max(set(pred), key = pred.count)
+            if index == 0:
+                model_path = "ML_models/random_model"
+            elif index == 1:
+                model_path = "ML_models/bully_model"
+            elif index == 2:
+                model_path = "ML_models/rdeep_model"
+            elif index == 3:
+                model_path = "ML_models/2ndBot_model"
+        else:
+            model_path = None
+        return model_path
 class RandBot(Bot):
 
     def __init__(self, rand: Random) -> None:
