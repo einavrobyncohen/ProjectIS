@@ -7,7 +7,7 @@ from dataclasses import dataclass, field
 from enum import Enum
 import pathlib
 from random import Random
-from typing import Iterable, Optional, Tuple, Union,List, cast, Any
+from typing import Iterable, Optional, Tuple, Union, List, cast, Any
 from .deck import CardCollection, OrderedCardCollection, Card, Rank, Suit
 import itertools
 import joblib
