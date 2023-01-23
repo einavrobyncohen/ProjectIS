@@ -28,8 +28,8 @@ def binom_experiment():
         if winner_id == rdeep_ML:
             win += 1
         if game_number % 50 == 0:
-            print(int(game_number) + " Game has finished")
-    result = binomtest(win, n=500, p=0.5, alternative='greater')
+            print(str(game_number) + " Game has finished")
+    result = binomtest(win, n=amount, p=0.5, alternative='greater')
     p_value = result.pvalue
     return result, p_value 
     
