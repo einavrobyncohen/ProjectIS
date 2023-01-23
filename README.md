@@ -33,12 +33,12 @@ Most examples are bots playing against each other; read the code for details.
 To run the CLI, run:
 
 ```sh
-python executables/cli.py
+python cli.py
 ```
 This will list the available commands.
 
 For example, if you want try a RandBot play against another RandBot, type
-`python executables/cli.py random-game`.
+`python cli.py random-game`.
 
 
 ## Running the GUI
@@ -55,7 +55,7 @@ Now, open your webbrowser and type in the server address (i.e., http://127.0.0.1
 By default, you are playing against RandBot. You can also play against other bots. Run 
 
 ```sh
-python executables/server.py --help
+python server.py --help
 ```
 for more details.
 
