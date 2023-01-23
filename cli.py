@@ -218,4 +218,4 @@ def experiment_rdeep():
     experimennt_binomial()
     
 if __name__ == "__main__":
-    main()
+    rdeepML_game()

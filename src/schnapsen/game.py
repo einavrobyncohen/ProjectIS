@@ -1308,10 +1308,10 @@ class PlayerPerspective(ABC):
         This function takes as input a PlayerPerspective variable, and the two moves of leader and follower,
         and returns a list of complete feature representation that contains all information
         """
-        player_game_state_representation = self.get_state_feature_vector(state)
+        player_game_state_representation = self.get_state_feature_vector()
         leader_move_representation = self.get_move_feature_vector(leader_move)
         follower_move_representation = self.get_move_feature_vector(follower_move)
-        cards_representation = self.available_card_feature_vector(state)
+        cards_representation = self.available_card_feature_vector()
         return player_game_state_representation + leader_move_representation + follower_move_representation + cards_representation
 
 class _DummyBot(Bot):

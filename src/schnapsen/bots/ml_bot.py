@@ -51,7 +51,9 @@ class MLPlayingBot(Bot):
                     state_representation + leader_move_representation + my_move_representation + cards_representation)
 
         model_output = self.__model.predict_proba(action_state_representations)
-        winning_probabilities_of_moves = [outcome_prob[1] for outcome_prob in model_output]
+        winning_probabilities_of_moves = []
+        for output in model_output:
+            winning_probabilities_of_moves += [output[1]]
         highest_value: float = -1
         best_move: Move
         for index, value in enumerate(winning_probabilities_of_moves):
