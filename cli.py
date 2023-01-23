@@ -111,8 +111,8 @@ def rdeepML_game() -> None:
     bot1: Bot
     bot2: Bot
     engine = SchnapsenGamePlayEngine()
-    rdeep = bot1 = RdeepMLBot(num_samples=12, depth=6, rand=random.Random(4564654644))
-    bot2 = RandBot(464566)
+    rdeep = bot1 = RdeepMLBot(num_samples=8, depth=6, rand=random.Random(4564654644))
+    bot2 = RandBot(random.Random(464566))
     wins = 0
     amount = 100
     for game_number in range(1, amount + 1):
