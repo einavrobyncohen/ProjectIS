@@ -30,5 +30,5 @@ def binom_experiment(amount, samples, depth):
             print(str(game_number) + " Game has finished")
     result = binomtest(win, n=amount, p=0.5, alternative='greater')
     p_value = result.pvalue
-    return result, p_value 
+    return result, p_value, wins
     
