@@ -14,7 +14,7 @@ from src.schnapsen.twenty_four_card_schnapsen import \
     TwentyFourSchnapsenGamePlayEngine
 from src.schnapsen.bots.bot2 import SecondBot
 from src.schnapsen.bots.rdeep import RdeepBot
-from binomial_experiment import experimennt_binomial
+from binomial_experiment import binom_experiment
 
 @click.group()
 def main() -> None:
@@ -215,7 +215,7 @@ def game_24() -> None:
 
 @main.command()
 def experiment_rdeep():
-    experimennt_binomial()
+    binom_experiment(500)
     
 if __name__ == "__main__":
     rdeepML_game()
