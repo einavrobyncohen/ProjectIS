@@ -857,7 +857,7 @@ class PlayerPerspective(ABC):
             full_state.leader.hand = Hand(new_opponent_hand)
 
         assert len(unseen_cards) == 0, "All cards must be consumed by either the opponent hand or talon by now"
-
+        
         return full_state
 
     def make_assumption_ML(self, leader_move: Optional[Move], rand: Random, my_move: Move) -> GameState:
@@ -1042,7 +1042,9 @@ class PlayerPerspective(ABC):
         else:
             full_state.leader.hand = Hand(new_opponent_hand)
 
+        
         assert len(unseen_cards) == 0, "All cards must be consumed by either the opponent hand or talon by now"
+        
         return full_state
     
     def get_one_hot_encoding_of_card_suit(self, card_suit: Suit) -> List[int]:

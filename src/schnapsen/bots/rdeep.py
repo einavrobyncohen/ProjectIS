@@ -38,6 +38,7 @@ class RdeepBot(Bot):
                 best_score = average_score
                 best_move = move
         assert best_move is not None
+        
         return best_move
 
     def __evaluate(self, gamestate: GameState, engine: GamePlayEngine, leader_move: Optional[Move], my_move: Move) -> float:

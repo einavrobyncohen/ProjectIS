@@ -133,16 +133,16 @@ def ml() -> None:
 @ml.command()
 def create_replay_memory_dataset() -> None:
     # define replay memory database creation parameters
-    num_of_games: int = 30000
+    num_of_games: int = 10000
     replay_memory_dir: str = 'ML_replay_memories'
-    replay_memory_filename: str = '2ndBot_2ndBot_30k_games_for_rollout.txt'
+    replay_memory_filename: str = 'RdeepBot_RdeepBot_10k_games_for_rollout.txt'
     replay_memory_location = pathlib.Path(replay_memory_dir) / replay_memory_filename
 
-    bot_1_behaviour: Bot = SecondBot(random.Random(5234243))
-    #bot_1_behaviour= RdeepBot(num_samples=15, depth=6, rand=random.Random(5234243))
+    #bot_1_behaviour: Bot = SecondBot(random.Random(5234243))
+    bot_1_behaviour= RdeepBot(num_samples=6, depth=6, rand=random.Random(5234243))
     # bot_1_behaviour: Bot = RdeepBot(num_samples=4, depth=4, rand=random.Random(4564654644))
-    bot_2_behaviour: Bot = SecondBot(random.Random(54354))
-    #bot_2_behaviour= RdeepBot(num_samples=15, depth=6, rand=random.Random(54354))
+    #bot_2_behaviour: Bot = SecondBot(random.Random(54354))
+    bot_2_behaviour= RdeepBot(num_samples=6, depth=6, rand=random.Random(54354))
     # bot_2_behaviour: Bot = RdeepBot(num_samples=4, depth=4, rand=random.Random(68438))
     delete_existing_older_dataset = False
 
@@ -168,7 +168,7 @@ def create_replay_memory_dataset() -> None:
 @ml.command()
 def train_model() -> None:
     # directory where the replay memory is saved
-    replay_memory_filename: str = '2ndBot_2ndBot_30k_games_for_rollout.txt'
+    replay_memory_filename: str = 'RdeepBot_RdeepBot_10k_games_for_rollout.txt'
     # filename of replay memory within that directory
     replay_memories_directory: str = 'ML_replay_memories'
     # Whether to train a complicated Neural Network model or a simple one.
@@ -176,7 +176,7 @@ def train_model() -> None:
     # Feel free to play with the hyperparameters of the model in file 'ml_bot.py', function 'train_ML_model',
     # under the code of body of the if statement 'if use_neural_network:'
     replay_memory_location = pathlib.Path(replay_memories_directory) / replay_memory_filename
-    model_name: str = '2ndBot_model'
+    model_name: str = 'New_Rdeep_model'
     model_dir: str = "ML_models"
     model_location = pathlib.Path(model_dir) / model_name
     overwrite: bool = False
@@ -215,7 +215,7 @@ def game_24() -> None:
 
 @main.command()
 def experiment_rdeep():
-    binom_experiment(500)
+    binom_experiment(100, 6, 6)
     
 if __name__ == "__main__":
-    rdeepML_game()
+    main()

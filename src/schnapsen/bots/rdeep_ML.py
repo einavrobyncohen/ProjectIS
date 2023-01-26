@@ -62,10 +62,10 @@ class RdeepMLBot(Bot):
             # we know what the other bot played
             leader_bot = FirstFixedMoveThenBaseBot(oppoenet, leader_move)
             # I am the follower
-            me = follower_bot = FirstFixedMoveThenBaseBot(MLPlayingBot(pathlib.Path("ML_models/rdeep_model")), my_move)
+            me = follower_bot = FirstFixedMoveThenBaseBot(MLPlayingBot(pathlib.Path("ML_models/New_Rdeep_model")), my_move)
         else:
             # I am the leader bot
-            me = leader_bot = FirstFixedMoveThenBaseBot(MLPlayingBot(pathlib.Path("ML_models/rdeep_model")), my_move)
+            me = leader_bot = FirstFixedMoveThenBaseBot(MLPlayingBot(pathlib.Path("ML_models/New_Rdeep_model")), my_move)
             # We assume the other bot just random
             follower_bot = oppoenet
 
@@ -106,7 +106,7 @@ class RdeepMLBot(Bot):
             elif index == 1:
                 model_path = "ML_models/bully_model"
             elif index == 2:
-                model_path = "ML_models/rdeep_model"
+                model_path = "ML_models/New_Rdeep_model"
             elif index == 3:
                 model_path = "ML_models/2ndBot_model"
         else:
