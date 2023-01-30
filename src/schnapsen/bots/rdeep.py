@@ -17,7 +17,7 @@ class RdeepBot(Bot):
         self.__num_samples = num_samples
         self.__depth = depth
         self.__rand = rand
-
+        self.count = []
     def get_move(self, state: PlayerPerspective, leader_move: Optional[Move]) -> Move:
         # get the list of valid moves, and shuffle it such
         # that we get a random move of the highest scoring
@@ -27,18 +27,27 @@ class RdeepBot(Bot):
 
         best_score = float('-inf')
         best_move = None
+        moves_count = 0
         for move in moves:
             sum_of_scores = 0.0
+            total_count = 0
             for _ in range(self.__num_samples):
-                gamestate = state.make_assumption(leader_move=leader_move, rand=self.__rand)
+                gamestate, count = state.make_assumption(leader_move=leader_move, rand=self.__rand)
+                if count is not None:
+                    total_count += count
                 score = self.__evaluate(gamestate, state.get_engine(), leader_move, move)
                 sum_of_scores += score
+            if count is not None:
+                total_count = total_count/self.__num_samples
+                moves_count += total_count
             average_score = sum_of_scores / self.__num_samples
             if average_score > best_score:
                 best_score = average_score
                 best_move = move
+            
         assert best_move is not None
-        
+        if count is not None:
+            self.count += [moves_count/len(moves)]
         return best_move
 
     def __evaluate(self, gamestate: GameState, engine: GamePlayEngine, leader_move: Optional[Move], my_move: Move) -> float:

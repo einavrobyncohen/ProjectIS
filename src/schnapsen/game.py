@@ -819,7 +819,7 @@ class PlayerPerspective(ABC):
 
         full_state = self.__game_state.copy_with_other_bots(_DummyBot(), _DummyBot())
         if self.get_phase() == GamePhase.TWO:
-            return full_state
+            return full_state, None
 
         seen_cards = self.seen_cards(leader_move)
         full_deck = self.__engine.deck_generator.get_initial_deck()
@@ -857,8 +857,11 @@ class PlayerPerspective(ABC):
             full_state.leader.hand = Hand(new_opponent_hand)
 
         assert len(unseen_cards) == 0, "All cards must be consumed by either the opponent hand or talon by now"
-        
-        return full_state
+        count = 0
+        for card in opponent_hand:
+            if card in new_opponent_hand:
+                count += 1
+        return full_state, count/5
 
     def make_assumption_ML(self, leader_move: Optional[Move], rand: Random, my_move: Move) -> GameState:
         """
@@ -883,7 +886,7 @@ class PlayerPerspective(ABC):
 
         full_state = self.__game_state.copy_with_other_bots(_DummyBot(), _DummyBot())
         if self.get_phase() == GamePhase.TWO:
-            return full_state
+            return full_state, None
         
         model = joblib.load("ML_models/predict_hands")
         seen_cards = self.seen_cards(leader_move)
@@ -1044,8 +1047,11 @@ class PlayerPerspective(ABC):
 
         
         assert len(unseen_cards) == 0, "All cards must be consumed by either the opponent hand or talon by now"
-        
-        return full_state
+        count = 0
+        for card in opponent_hand:
+            if card in new_opponent_hand:
+                count += 1
+        return full_state, count/5
     
     def get_one_hot_encoding_of_card_suit(self, card_suit: Suit) -> List[int]:
         """

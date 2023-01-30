@@ -1,5 +1,6 @@
 # Schnapsen platform - Project Intelligent Systems 2022-2023
-
+## Please Create Dataset and Run KNN_modelling
+The dataset and KNN model are too large, so please create datasets from 'python cli.py ml create-replay-memory-dataset' with labels as mentioned in the paper and model the KNN to run the code
 ## Getting started
 
 This is the improved platform for the schnapsen card game. To get to know the concept of the game, please visit

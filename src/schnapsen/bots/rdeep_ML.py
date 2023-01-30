@@ -2,7 +2,9 @@ import pathlib
 from typing import Optional, cast
 from src.schnapsen.game import Bot, PlayerPerspective, Move, GameState, GamePlayEngine, Trick
 from random import Random
-from src.schnapsen.bots import MLPlayingBot, RdeepBot
+from src.schnapsen.bots import MLPlayingBot, RdeepBot, RandBot
+from src.schnapsen.bots.bot2 import SecondBot
+from src.schnapsen.bots.bully import BullyBot
 import joblib
 import numpy as np
 
@@ -21,6 +23,8 @@ class RdeepMLBot(Bot):
         self.__depth = depth
         self.__rand = rand
         self.previous_state = []
+        self.count = []
+        self.KNN_count = [0,0,0,0]
     def get_move(self, state: PlayerPerspective, leader_move: Optional[Move]) -> Move:
         # get the list of valid moves, and shuffle it such
         # that we get a random move of the highest scoring
@@ -30,17 +34,26 @@ class RdeepMLBot(Bot):
         best_score = float('-inf')
         best_move = None
         model_path = self.predict_opponent(state)
+        moves_count = 0
         for move in moves:
             sum_of_scores = 0.0
+            total_count = 0
             for _ in range(self.__num_samples):
-                gamestate = state.make_assumption_ML(leader_move=leader_move, rand=self.__rand, my_move=move)
+                gamestate, count = state.make_assumption_ML(leader_move=leader_move, rand=self.__rand, my_move=move)
+                if count is not None:
+                    total_count += count
                 score = self.__evaluate(model_path, gamestate, state.get_engine(), leader_move, move)
                 sum_of_scores += score
+            if count is not None:
+                total_count = total_count/self.__num_samples
+                moves_count += total_count
             average_score = sum_of_scores / self.__num_samples
             if average_score > best_score:
                 best_score = average_score
                 best_move = move
         assert best_move is not None
+        if count is not None:
+            self.count += [moves_count/len(moves)]
         return best_move
 
     def __evaluate(self, model_path, gamestate: GameState, engine: GamePlayEngine, leader_move: Optional[Move], my_move: Move) -> float:
@@ -101,6 +114,7 @@ class RdeepMLBot(Bot):
             model = joblib.load("ML_models/KNN_model")
             pred = list(model.predict(self.previous_state))
             index = max(set(pred), key = pred.count)
+            self.KNN_count[index] += 1
             if index == 0:
                 model_path = "ML_models/random_model"
             elif index == 1:
@@ -112,6 +126,7 @@ class RdeepMLBot(Bot):
         else:
             model_path = None
         return model_path
+    
 class RandBot(Bot):
 
     def __init__(self, rand: Random) -> None:
