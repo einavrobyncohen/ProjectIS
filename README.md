@@ -1,6 +1,7 @@
 # Schnapsen platform - Project Intelligent Systems 2022-2023
 ## Please Create Dataset and Run KNN_modelling
-The dataset and KNN model are too large, so please create datasets from 'python cli.py ml create-replay-memory-dataset' with labels 0 for Rand, 1 for Bully, 2 for Rdeep and 3 for SecondBot as an opponent bot's strategy and model the KNN to run the code
+The dataset and KNN model are too large, so please create datasets and model the KNN to run the code.
+
 ## Getting started
 
 This is the improved platform for the schnapsen card game. To get to know the concept of the game, please visit
